@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="id=edge">
+	<title>纯js实现轮播图</title>
+	<style type="text/css">
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+		#swiper {
+			overflow: hidden;
+			position: relative;
+		}
+		.swiper-btn {
+			position: absolute;
+			top: 0;
+			width: 50%;
+			height: 100%;
+			/*background: rgba(0,0,0,0.5);*/
+		}
+		.swiper-btn-prev {
+			left: 0;
+		}
+		.swiper-btn-next {
+			right: 0;
+		}
+		.swiper-container {
+			width: 100%;
+			height: 300px;
+			margin: 0;
+			padding: 0;
+			white-space: nowrap;
+			transition-duration: 0.3s;
+		}
+		.swiper-item {
+			display: inline-block;
+			width: 100%;
+			height: 100%;
+			background: no-repeat center / contain;
+		}
+	</style>
+</head>
+<body>
+	<div id="swiper" style="width:100%;height:300px;overflow:hidden;border:1px solid red;">
+		
+	</div>
+	<script type="text/javascript">
+		class Swiper {
+			constructor(el, option) {
+				if (!this.judgeDOM(el)) {
+					throw Error('Swiper need a DOM as container!')
+				}
+				this.disable = false;
+				this.dx = 0;
+				this.imgLen = 0;
+				this.container = null;
+				this.option = {};
+				this.timerId = 0;
+				let defaultOption = {
+					imgs: [],
+					speed: 300,
+					duration: 3000
+				}
+
+				this.option = Object.assign(defaultOption, option);
+
+				this.imgLen = this.option.imgs.length;
+
+				this.container = document.createElement('div');
+				this.container.classList.add('swiper-container');
+				this.container.style.transitionDuration = this.option.speed / 1000 + 's';
+				el.appendChild(this.container);
+
+				const prevBtn = document.createElement('div');
+				const nextBtn = document.createElement('div');
+				prevBtn.className = 'swiper-btn swiper-btn-prev';
+				nextBtn.className = 'swiper-btn swiper-btn-next';
+				el.appendChild(prevBtn);
+				el.appendChild(nextBtn);
+				prevBtn.onclick = () => {
+					clearTimeout(this.timerId);
+					this.move(-1);
+					this.carousel();
+				}
+				nextBtn.onclick = () => {
+					clearTimeout(this.timerId);
+					this.move(1);
+					this.carousel();
+				}
+
+				for (let url of this.option.imgs) {
+					let item = document.createElement('div');
+					item.classList.add('swiper-item');
+					item.style.backgroundImage = `url(${url})`;
+					this.container.appendChild(item);
+				}
+
+				this.carousel();
+			}
+
+			judgeDOM(el) {
+				return el && typeof el === 'object' && el.nodeType === 1;
+			}
+
+			carousel() {
+				if (this.disable) return;
+				this.timerId = setTimeout(() => {
+					this.move(1)
+					this.carousel();
+				}, this.option.duration)
+			}
+
+			move(step) {
+				let dx = -step * 100;
+				this.dx += dx;
+				if (this.dx <= -100 * this.imgLen) {
+					this.dx = 0;
+				}
+				if (this.dx >= 100) {
+					this.dx = -100 * (this.imgLen - 1);
+				}
+				this.container.style.transform = `translate(${this.dx}%, 0)`;
+			}
+
+		}
+
+		new Swiper(document.getElementById('swiper'), {
+			imgs: ['./400X400.JPG', '500X700.JPG', './400X400.JPG', '500X700.JPG'],
+
+		});
+	</script>
+</body>
+</html>

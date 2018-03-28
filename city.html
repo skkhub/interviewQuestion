@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="id=edge">
+	<title>城市选择组件</title>
+	<style type="text/css">
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+		body {
+			background: #f4f4f4;
+		}
+		.search-container {
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 1;
+			width: 100%;
+			height: 30px;
+			box-shadow: 0 0 10px 1px #666;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background: #efefef;
+		}
+		.search-bar {
+			width: 80%;
+			height: 24px;
+			padding: 0 8px;
+			border-radius: 2px;
+			background: #d9d9d9;
+			border: none;
+		}
+		.search-bar:focus~.associate {
+			display: block;;
+		}
+		.associate {
+			display: none;
+			position: absolute;
+			top: 30px;
+			left: 0;
+			z-index: 1;
+			width: 100%;
+			height: calc(100vh - 30px);
+			background: rgba(0,0,0,0.5);
+		}
+		.main {
+			margin-top: 30px;
+			padding: 10px 16px;
+			height: calc(100vh - 30px);
+			overflow: auto;
+		}
+		#nav-mini {
+			position: fixed;
+			top: 50%;
+			left: 0;
+			transform: translate(0, -50%);
+			color: green;
+			padding: 0;
+		}
+		#nav-mini ul {
+			background: transparent;
+			padding: 4px;
+		}
+		#nav-mini li {
+			white-space: nowrap;
+			font-size: 12px;
+			background: transparent;
+			border: none;
+			text-align: center;
+			height: 18px;
+			line-height: 18px;
+		}
+		nav {
+			/*border: 1px solid red;*/
+			/*padding: 4px 8px;*/
+		}
+		nav ul {
+			padding: 0 8px;
+			background: #fff;
+		}
+		nav li {
+			background: #fff;
+			border-bottom: 1px solid #e4e4e4;
+			font-size: 14px;
+			line-height: 24px;
+			height: 24px;
+		}
+		nav li:last-child {
+			border: none;
+		}
+		.nav-history ul, .nav-hot ul {
+			display: flex;
+			flex-wrap: wrap;
+			background: transparent;
+		}
+		.nav-history li, .nav-hot li {
+			padding: 0 20px;
+			margin: 4px;
+			text-align: center;
+			border: none;
+			background: #fff;
+		}
+		.location:before {
+			content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABPUlEQVQ4T6WTa3HEMAyEtQhaBj0IgZAyWDMIg6YMAiEQrggsBs0xSBkchGOgzqbOTS6PmZup/nhiW592JQf2z8BePsnazD4AUOcRMQLoc85f6/sbAMkzgCoiGncflUCyMrPWzN7c/X0JeQCQbAA0OWcpUGINIHLOl/LdaXX3aVU8AFJK14hQ8s3Mvs3sZ7r0p2iCAhhzzqcNQDKLz5qk5KpSv6h803dKaYiIdrZ3V1DkdpJPUhIHdx8KQM2sJL0AuvlsCTgBGCSvwPpZdrHzqaSUkiyoqbs9GCOC7n4lSQCy8hoRvbufSaqIHwI0BTOr3V3rJkiqJ6Nguwq0ufY4XyxNVvX7BDZjnB+NZEaEmqZxTnEEPnrKelDt7LVI11in8S5jF1CUyO+LmV2WsKcBBaL/ol7beUrB3hT29n4B1Ia5EVk3psUAAAAASUVORK5CYII=);
+		}
+		h3 {
+			color: #000;
+			font-size: 16px;
+		}
+
+		#popup {
+			display: none;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			min-width: 60px;
+			min-height: 60px;
+			background: rgba(0,0,0,0.6);
+			font-size: 40px;
+			line-height: 1.5;
+			color: #fff;
+			text-align: center;
+			border-radius: 4px;
+			-webkit-appearance: none;
+			border: none;
+		}
+
+		::-webkit-scrollbar {
+		  display:none;
+		}
+	</style>
+</head>
+<body>
+	<header class="search-container">
+		<input id="search-bar" class="search-bar" type="search" name="search" oninput="onInput(this.value)" placeholder="请输入城市名">
+		<div class="associate">
+			<nav>
+				<ul id="associate-container">
+				</ul>
+			</nav>
+		</div>
+	</header>
+	<article class="main">
+		<nav id="nav-mini">
+			<!-- <ul>
+				<li>A</li>
+				<li>B</li>
+				<li>C</li>
+				<li>D</li>
+				<li>E</li>
+				<li>F</li>
+			</ul> -->
+		</nav>
+		<section id="panel">
+			<!-- <nav class="nav-history">
+				<h3>定位/历史</h3>
+				<ul>
+					<li class="location">北京</li>
+					<li>北京</li>
+					<li>北京</li>
+					<li>北京</li>
+					<li>北京</li>
+					<li>北京</li>
+					<li>北京</li>
+				</ul>
+			</nav>
+			<nav class="nav-hot">
+				<h3>热门</h3>
+				<ul>
+					<li>北京</li>
+					<li>北京</li>
+					<li>北京</li>
+					<li>北京</li>
+				</ul>
+			</nav>
+			<nav>
+				<h3>A</h3>
+				<ul>
+					<li>鞍山</li>
+					<li>安阳</li>
+					<li>安庆</li>
+				</ul>
+			</nav>
+			<nav>
+				<h3>B</h3>
+				<ul>
+					<li>北京</li>
+					<li>保定</li>
+					<li>包头</li>
+					<li>滨州</li>
+				</ul>
+			</nav>
+			<nav>
+				<h3>C</h3>
+				<ul>
+					<li>成都</li>
+					<li>重庆</li>
+					<li>长沙</li>
+				</ul>
+			</nav> -->
+		</section>
+	</article>
+
+	<button id="popup" type="button"></button>
+
+	<script type="text/javascript" src="./city.js"></script>
+	<script type="text/javascript">
+		// city.js文件在全局下定义了包含全部页面数据的变量cityData
+
+    const domSearch 	 = document.getElementById('search-bar');
+		const domPanel 		 = document.getElementById('panel');
+		const domNavMini 	 = document.getElementById('nav-mini');
+  	const domAssociate = document.getElementById('associate-container');
+  	const domPopup		 = document.getElementById('popup');
+
+    let timerSearch = 0;	// 计时器
+		let timerPopup	= 0;
+		// 将所有城市的obj格式化到一个数组中
+    const cities = cityData.slice(2).reduce((prev, cur) => prev.concat(cur.cities), []);
+
+		loadHistoryData();
+		renderSide(cityData);
+		renderPanel(cityData);
+		bindEvent();
+
+		function loadHistoryData() {
+			if (localStorage.historyData) {
+				let historyData = JSON.parse(localStorage.historyData);
+				if (historyData instanceof Array) {
+					cityData[0].cities = historyData;
+				}
+			}
+		}
+
+		function bindEvent() {
+			selectHandler = e => {
+	    	const target = e.target;
+				const name 	 = target.getAttribute('data-name');
+				const cityid = target.getAttribute('data-cityid');
+				if (target.nodeName.toLowerCase() == 'li' && name && cityid) {
+					saveData({name, cityid});
+					// 选择城市后传递参数，执行后续操作
+					doSomething({name, cityid});
+				}
+	    }
+
+			domPanel.onclick = selectHandler;
+
+	    domAssociate.addEventListener('touchstart', selectHandler);
+
+			domSearch.oninput = e => {
+				clearTimeout(timerSearch);
+				let val = e.target.value.trim();
+	    	const associateArr = getAssociateArr(val);
+	    	timerSearch = setTimeout(() => {
+		    	console.time('time1')
+		    	renderAssociate(associateArr)
+		    	console.timeEnd('time1')
+	    	}, 300)
+			}
+
+			domNavMini.onclick = e => {
+				const char = e.target.firstChild.nodeValue;
+				console.log(char)
+				document.querySelector(`h3[data-location=${char}]`).scrollIntoView({
+					block: 'start',
+					behavior: 'smooth'
+				});
+
+				popup(char);
+			}
+		}
+
+		function renderPanel(data) {
+			if (!data instanceof Array) return;
+
+			for(let i = 0, l = data.length; i < l; i++) {
+				const domNav = document.createElement('nav');
+				i == 0 && (domNav.className = 'nav-history');
+				i == 1 && (domNav.className = 'nav-hot');
+
+				const domH3 = document.createElement('h3');
+				domH3.setAttribute('data-location', data[i].name);
+				domH3.innerText = data[i].name;
+
+				const domUl = document.createElement('ul');
+				data[i].cities.forEach(({name, cityid}) => {
+					const domLi = document.createElement('li');
+					domLi.setAttribute('data-name', name);
+					domLi.setAttribute('data-cityid', cityid);
+					domLi.innerText = name;
+					domUl.appendChild(domLi);
+				})
+
+				domNav.appendChild(domH3);
+				domNav.appendChild(domUl);
+				domPanel.appendChild(domNav);
+			}
+		}
+
+		function renderLocationAndHistory() {
+			let domHistoryUl = document.getElementsByClassName('nav-history')[0].lastElementChild;
+
+			domHistoryUl.innerHTML = '';
+
+			cityData[0].cities.forEach(({name, cityid}, index) => {
+				const domLi = document.createElement('li');
+				domLi.setAttribute('data-name', name);
+				domLi.setAttribute('data-cityid', cityid);
+				if (index === 0) {
+					domLi.className = 'location';
+				}
+				domLi.innerText = name;
+
+				domHistoryUl.appendChild(domLi);
+			})
+		}
+
+		function renderSide(data) {
+			if (!data instanceof Array) return;
+
+			const domUl = document.createElement('ul');
+
+			for (let obj of data) {
+				const ascii = obj.name.charCodeAt(0);
+				if (ascii > 64 && ascii < 91) {
+					const domLi = document.createElement('li');
+					domLi.innerText = obj.name;
+					domUl.appendChild(domLi);
+				}
+			}
+
+			domNavMini.appendChild(domUl);
+		}
+
+		function saveData(city) {
+			if (!localStorage.historyData) {
+				localStorage.historyData = '[]';
+			}
+
+			let strData = localStorage.historyData;
+			let index = strData.indexOf(JSON.stringify(city));
+
+			if (index >= 0) {
+				let reg = new RegExp(JSON.stringify(city) + '(,)?');
+				strData = strData.replace(reg, '');
+			}
+
+			let arrData = JSON.parse(strData);
+
+			if (arrData instanceof Array) {
+				arrData.unshift(city);
+			}
+
+			if (arrData.length > 9) {
+				arrData.length = 9;
+			}
+
+			localStorage.historyData = JSON.stringify(arrData);
+		}
+
+		function popup(str) {
+			clearTimeout(timerPopup);
+
+			if (str.length > 1) {
+				domPopup.style.fontSize = '14px';
+			} else {
+				domPopup.style.fontSize = '40px';
+			}
+			domPopup.innerText = str;
+			domPopup.style.display = 'block';
+
+			timerPopup = setTimeout(() => {
+				domPopup.style.display = 'none';
+			}, 1000)
+		}
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(getLocationSuccess, getLocationfail);
+        } else {
+            popup("该浏览器不支持定位功能！");
+        }
+    }
+
+    function getLocationSuccess(position) {
+      let city = getCurrentCity(position.coords.longitude, position.coords.latitude);
+      console.log('location: ', city)
+      saveData(city);
+      loadHistoryData();
+      renderLocationAndHistory();
+    }
+
+    function getLocationfail(error) {
+        switch (error.code) {  
+        case error.PERMISSION_DENIED:
+            popup("用户拒绝对获取地理位置的请求。");
+            break;
+        case error.POSITION_UNAVAILABLE:
+            popup("位置信息是不可用的。");
+            break;
+        case error.TIMEOUT:
+            popup("请求用户地理位置超时。");
+            break;
+        case error.UNKNOWN_ERROR:
+            popup("未知错误。");
+            break;
+        }  
+    }
+
+    function getCurrentCity(lon, lat) {
+    	// 后台判断或前台判断后返回
+    	return {
+    		name: "北京市",
+				cityid: 1
+    	}
+    }
+    getLocation();
+
+    // 联想函数
+    function getAssociateArr(str) {
+    	if (str === '') return [];
+
+    	let arr = [];
+    	for (let city of cities) {
+    		if (city.name.match(str) || city.tags[0].match(str.toUpperCase())) {
+    			arr.push(city);
+    		}
+    	}
+    	return arr;
+    }
+		
+    function renderAssociate(cities) {
+    	domAssociate.innerHTML = '';
+    	cities.forEach(({name, cityid}) => {
+				const domLi = document.createElement('li');
+				domLi.setAttribute('data-name', name);
+				domLi.setAttribute('data-cityid', cityid);
+				domLi.innerText = name;
+				domAssociate.appendChild(domLi);
+			})
+			// 可能另一种渲染方式更快更流畅：将第一次搜索出来的dom渲染，之后display：none，需要显示时再展示
+    }
+    
+    function doSomething(data) {
+    	console.log(data);
+    }
+
+	</script>
+</body>
+</html>
